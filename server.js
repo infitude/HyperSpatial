@@ -9,8 +9,8 @@ http.createServer(function(req, res) {
  
   res.writeHead(200, { 'Content-Type': 'text/plain' });
  
-  db.on('error', res.write('connection error:');
-  db.once('open', res.write('db connected:');
+  db.on('error', res.write('connection error:'));
+  db.once('open', res.write('db connected:'));
 
   res.end('Hello World and Pete\n');
 

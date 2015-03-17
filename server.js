@@ -79,7 +79,8 @@ var context = {
 // compact a document according to a particular context
 // see: http://json-ld.org/spec/latest/json-ld/#compacted-document-form
 jsonld.compact(doc, context, function(err, compacted) {
-  console.log(JSON.stringify(compacted, null, 2));
+  //console.log(JSON.stringify(compacted, null, 2));
+  res.send(JSON.stringify(compacted, null, 2));
   /* Output:
   {
     "@context": {...},
@@ -90,8 +91,8 @@ jsonld.compact(doc, context, function(err, compacted) {
   */
 });
 
-    
-    res.send('ok');
+
+    //res.send('ok');
 });
  
 ///http://<>Server:3000/<DB>/<Collection>/identify?geometryType=esriGeometryPoint&geometry=-120,40&tolerance=10

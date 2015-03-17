@@ -59,6 +59,40 @@ var server = app.listen(port, function () {
  
 })
 
+
+app.get('/test/jsonld', function (req,res) {
+
+    console.log('test jsonld');
+
+var doc = {
+  "http://schema.org/name": "Manu Sporny",
+  "http://schema.org/url": {"@id": "http://manu.sporny.org/"},
+  "http://schema.org/image": {"@id": "http://manu.sporny.org/images/manu.png"}
+};
+var context = {
+  "name": "http://schema.org/name",
+  "homepage": {"@id": "http://schema.org/url", "@type": "@id"},
+  "image": {"@id": "http://schema.org/image", "@type": "@id"}
+};
+
+
+// compact a document according to a particular context
+// see: http://json-ld.org/spec/latest/json-ld/#compacted-document-form
+jsonld.compact(doc, context, function(err, compacted) {
+  console.log(JSON.stringify(compacted, null, 2));
+  /* Output:
+  {
+    "@context": {...},
+    "name": "Manu Sporny",
+    "homepage": "http://manu.sporny.org/",
+    "image": "http://manu.sporny.org/images/manu.png"
+  }
+  */
+});
+
+    
+    res.send('ok');
+});
  
 ///http://<>Server:3000/<DB>/<Collection>/identify?geometryType=esriGeometryPoint&geometry=-120,40&tolerance=10
 app.get('/test/City/identify', function (req, res) {

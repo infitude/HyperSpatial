@@ -21,6 +21,7 @@ var express = require("express");
 var bodyParser = require('body-parser');
 var path = require("path");
 var jsonld = require('jsonld');
+var neo4j = require('neo4j');
  
 var app = express();
  
@@ -58,6 +59,27 @@ var server = app.listen(port, function () {
   console.log('Example app listening at http://%s:%s', host, port);
  
 })
+
+app.get('/test/neo4j', function (req,res) {
+
+    console.log('test neo4j');
+
+
+    var neo4jdb = new neo4j.GraphDatabase("http://events:19JCeWTkMQyhskhxwDTk@events.sb02.stations.graphenedb.com:24789");
+
+    console.log('connected');
+
+var node = neo4jdb.createNode({hello: 'world'});     // instantaneous, but...
+node.save(function (err, node) {    // ...this is what actually persists.
+    if (err) {
+        console.error('Error saving new node to database:', err);
+    } else {
+        console.log('Node saved to database with id:', node.id);
+    }
+});
+
+    res.send('ok');
+});
 
 
 app.get('/test/jsonld', function (req,res) {

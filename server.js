@@ -22,6 +22,7 @@ var bodyParser = require('body-parser');
 var path = require("path");
 var jsonld = require('jsonld');
 var neo4j = require('neo4j');
+var traverse = require('traverse');
  
 var app = express();
  
@@ -60,6 +61,48 @@ var server = app.listen(port, function () {
  
 })
 
+
+app.get('/test/traverse', function (req,res) {
+
+    console.log('start traverse');
+
+    var doc = {
+        "@id": "http://fred",
+      "http://schema.org/name": "Manu Sporny",
+      "http://schema.org/url": {"@id": "http://manu.sporny.org/"},
+      "http://schema.org/image": {"@id": "http://manu.sporny.org/images/manu.png"}
+    };
+    var context = {
+      "name": "http://schema.org/name",
+      "homepage": {"@id": "http://schema.org/url", "@type": "@id"},
+      "image": {"@id": "http://schema.org/image", "@type": "@id"}
+    };
+
+    jsonld.compact(doc, context, function(err, compacted) {
+
+    jsonld.expand(compacted, function(err, expanded) {
+            console.log(expanded);
+
+            console.log("-------------V------------")
+            traverse(expanded).map(function (x) {
+                console.log(this.node);
+                console.log("-------------------------")
+            });
+        });
+
+   // jsonld.toRDF(compacted, {format: 'application/nquads'}, function(err, data) {
+   //     console.log(data);
+   // });
+
+    });
+
+    console.log('end traverse');
+
+    res.send('done');
+
+});
+
+
 app.get('/test/neo4j', function (req,res) {
 
     console.log('test neo4j');
@@ -69,16 +112,38 @@ app.get('/test/neo4j', function (req,res) {
 
     console.log('connected');
 
-var node = neo4jdb.createNode({hello: 'world'});     // instantaneous, but...
-node.save(function (err, node) {    // ...this is what actually persists.
-    if (err) {
-        console.error('Error saving new node to database:', err);
-    } else {
-        console.log('Node saved to database with id:', node.id);
-    }
-});
+var doc = {
+  "http://schema.org/name": "Manu Sporny",
+  "http://schema.org/url": {"@id": "http://manu.sporny.org/"},
+  "http://schema.org/image": {"@id": "http://manu.sporny.org/images/manu.png"}
+};
+var context = {
+  "name": "http://schema.org/name",
+  "homepage": {"@id": "http://schema.org/url", "@type": "@id"},
+  "image": {"@id": "http://schema.org/image", "@type": "@id"}
+};
 
-    res.send('ok');
+//jsonld.compact(doc, context, function(err, compacted) {
+jsonld.toRDF(doc, {format: 'application/nquads'}, function(err, data) {
+
+    //var node = neo4jdb.createNode(doc);     // instantaneous, but...
+    //var data = {'hello': 'world'};
+    //var data = {"homepage": {"@id": "http://schema.org/url", "@type": "@id"}};
+    var node = neo4jdb.createNode(data); 
+    console.log(data);
+    node.save(function (err, node) {    // ...this is what actually persists.
+        if (err) {
+            console.error('Error saving new node to database:', err);
+        } else {
+            console.log('Node saved to database with id:', node.id);
+        }
+    });
+
+
+    res.send('done');
+    });
+
+
 });
 
 
@@ -102,7 +167,7 @@ var context = {
 // see: http://json-ld.org/spec/latest/json-ld/#compacted-document-form
 jsonld.compact(doc, context, function(err, compacted) {
   //console.log(JSON.stringify(compacted, null, 2));
-  res.send(JSON.stringify(compacted, null, 2));
+  res.send(JSON.stringify(doc, null, 2));
   /* Output:
   {
     "@context": {...},
